@@ -22,6 +22,10 @@
 
 Flutter（Android）· MapLibre GL · 自建矢量瓦片 · OSRM 路由 · NestJS BFF · PostgreSQL + Redis。
 
+## 仓库骨架
+
+当前已按 `AGENTS.md` 初始化 monorepo 目录：`apps/mobile-flutter`、`apps/ops-admin`、`services/map-bff`、`services/report-service`、`infra/osm`、`infra/routing`、`infra/tiles`、`packages/shared-types`、`packages/test-fixtures` 与 `docs`。根目录 `package.json` 声明 npm workspaces，后续任务落地具体 Flutter、NestJS 与共享包时补充实际构建、lint 和测试脚本。
+
 ## 锁定口径（勿改）
 
 开源自搭 / 仅 Android / 全链路 WGS-84 不做坐标转换 / 实时路况与事件本周不做真实数据源 / 内部小范围试用不公开上架。详见 `AGENTS.md`。
