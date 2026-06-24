@@ -1,0 +1,30 @@
+# Cursor 规则 — Flutter / Android 前端
+
+> 适用于 `apps/mobile-flutter/` 下的开发。
+
+## 平台
+
+- 只针对 Android 构建与调试。`flutter run` 用安卓真机或模拟器。
+- 需要的权限：定位（前台 + 后台）、网络、麦克风（语音上报）。在 `AndroidManifest.xml` 里声明，并在首次使用前请求。
+- 处理息屏 / 后台保活：导航态用前台服务（foreground service）保持定位，避免被系统杀。
+
+## 地图
+
+- 用 MapLibre GL flutter 插件，加载自建瓦片源（由 BFF 代理或直连自有 tileserver）。
+- 路线折线：长路线先做 simplify（Douglas–Peucker），避免上万点拖垮帧率。
+- 路况着色：本周用道路静态等级（OSM highway tag）映射颜色，**不是实时数据**，注释里写清楚。
+
+## 导航态
+
+- 定位跟随 + 回中 + 视角；剩余里程 / 时间 / 下一动作提示。
+- TTS 用 flutter 的 tts 插件，中文普通话，只做基础转向播报。
+- 弱网：进入导航前缓存路线摘要与拐点列表；断网时显示已缓存内容，不承诺即时重算。
+
+## 状态与数据
+
+- 所有路由 / 搜索 / 上报请求走 `core/map_provider/` 下的 client，client 只调 BFF。
+- DTO 从 `packages/shared-types` 引用，不在前端重复定义。
+
+## 性能验收
+
+- 首次定位 < 3s，路线计算 < 2s，导航页 ≥ 50 FPS，崩溃 blocker = 0。

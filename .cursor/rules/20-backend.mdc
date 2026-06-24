@@ -1,0 +1,33 @@
+# Cursor 规则 — 后端 BFF / 基础设施
+
+> 适用于 `services/` 与 `infra/` 下的开发。
+
+## BFF（services/map-bff）
+
+- 框架 NestJS。对外暴露三组接口：`/route`、`/search`、`/tiles`（瓦片代理）。
+- BFF 是前端与底层（路由引擎 / 瓦片 / DB）之间唯一的编排层。前端永远不直连底层。
+- 路由引擎地址、瓦片地址、DB 连接全部走环境变量。
+- 返回给前端的结构用 `packages/shared-types` 定义的 DTO，坐标一律 WGS-84，`[lng, lat]` 顺序并在 DTO 注释里写明。
+
+## 上报服务（services/report-service）
+
+- 接口：`POST /reports`（接收）、`GET /reports`（后台列出）、`PATCH /reports/:id`（审核）。
+- 字段最小化：类型、坐标、可选描述、可选图片引用、时间戳、匿名标记。
+- 不长久留存轨迹；上报默认可匿名。
+
+## 基础设施（infra/）
+
+- `infra/osm/`：下载武汉 OSM 提取、转换的脚本。**不要把 .pbf 数据提交进 git**，脚本负责拉取。
+- `infra/routing/`：OSRM（默认）的预处理与启动配置（osrm-extract / osrm-contract / osrm-routed）。
+- `infra/tiles/`：从 OSM 生成矢量瓦片的配置。
+- 全部用脚本 + 配置描述，可一键重建，不依赖某人本机的手工步骤。
+
+## 路由引擎注意
+
+- OSRM 默认用 car profile，针对武汉需检查：单行线、桥隧、快速路匝道的转向限制。
+- 备选路线：OSRM 用 `alternatives=true`，控制在 1–3 条。
+- 路由质量是本项目最大风险，相关代码 / 配置改动在 PR 里要附一组测试起终点的结果对比。
+
+## 提交前
+
+- `npm run lint` 与单测通过；接口契约变更同步更新 `docs/api-contract.md` 与 `packages/shared-types`。

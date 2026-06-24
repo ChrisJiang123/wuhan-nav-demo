@@ -1,0 +1,28 @@
+# 环境与密钥
+.env
+*.env.local
+uploads/
+
+# OSM 大数据文件（用脚本下载，不入库）
+*.pbf
+*.osm
+*.mbtiles
+*.pmtiles
+infra/osm/data/
+infra/routing/data/
+infra/tiles/data/
+
+# Flutter
+apps/mobile-flutter/build/
+apps/mobile-flutter/.dart_tool/
+apps/mobile-flutter/.flutter-plugins*
+*.iml
+.idea/
+
+# Node
+node_modules/
+dist/
+*.log
+
+# 系统
+.DS_Store
