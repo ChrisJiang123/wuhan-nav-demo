@@ -1,0 +1,19 @@
+{
+  "name": "wuhan-nav-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Android-only Wuhan navigation demo built with OpenStreetMap, MapLibre, and a self-hosted routing stack.",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "echo \"No build targets yet. Add workspace builds as tasks land.\"",
+    "lint": "echo \"No lint targets yet. Add workspace lint scripts as tasks land.\"",
+    "test": "echo \"No test targets yet. Add workspace tests as tasks land.\""
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
