@@ -10,7 +10,9 @@
   ],
   "scripts": {
     "build": "echo \"No build targets yet. Add workspace builds as tasks land.\"",
-    "lint": "echo \"No lint targets yet. Add workspace lint scripts as tasks land.\"",
+    "lint": "npm run lint:backend && npm run lint:flutter",
+    "lint:backend": "bash scripts/ci/backend-lint.sh",
+    "lint:flutter": "bash scripts/ci/flutter-analyze.sh",
     "test": "echo \"No test targets yet. Add workspace tests as tasks land.\""
   },
   "engines": {
