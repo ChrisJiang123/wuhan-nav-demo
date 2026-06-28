@@ -9,11 +9,15 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "echo \"No build targets yet. Add workspace builds as tasks land.\"",
-    "lint": "npm run lint:backend && npm run lint:flutter",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint:packages && npm run lint:backend && npm run lint:flutter",
+    "lint:packages": "bash scripts/ci/package-lint.sh",
     "lint:backend": "bash scripts/ci/backend-lint.sh",
     "lint:flutter": "bash scripts/ci/flutter-analyze.sh",
-    "test": "echo \"No test targets yet. Add workspace tests as tasks land.\""
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
   },
   "engines": {
     "node": ">=20"
