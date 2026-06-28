@@ -42,8 +42,8 @@ From `infra/routing`:
 docker compose up osrm-routed
 ```
 
-The service listens on `http://localhost:5000` by default. Override with
-`OSRM_PORT` if needed:
+The service listens on `http://localhost:5000` by default. On macOS, port 5000
+is often occupied by AirPlay Receiver; use `OSRM_PORT=5001` when that happens:
 
 ```bash
 OSRM_PORT=5001 docker compose up osrm-routed
@@ -70,7 +70,7 @@ route quality, one-way streets, bridges, tunnels, ramps, and demo suitability.
 - [ ] If the default bbox is too broad or too narrow, rerun with a manually verified `WUHAN_BBOX` or `WUHAN_POLY_FILE`.
 - [ ] Run `docker compose run --rm osrm-extract` from `infra/routing`.
 - [ ] Run `docker compose run --rm osrm-contract` from `infra/routing`.
-- [ ] Run `docker compose up osrm-routed` from `infra/routing`.
+- [ ] Run `docker compose up osrm-routed` from `infra/routing`; on macOS prefer `OSRM_PORT=5001 docker compose up osrm-routed` if AirPlay Receiver occupies port 5000.
 - [ ] Run `./infra/routing/verify-route.sh` and confirm all three responses contain non-empty `routes`.
 - [ ] Manually inspect route quality for the selected demo cases.
 - [ ] Confirm no `.pbf`, `.osrm*`, or generated data files are staged for git.
