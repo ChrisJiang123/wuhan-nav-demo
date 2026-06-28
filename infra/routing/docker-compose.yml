@@ -1,6 +1,6 @@
 services:
   osrm-extract:
-    image: osrm/osrm-backend:v5.27.1
+    image: ghcr.io/project-osrm/osrm-backend:latest
     working_dir: /data
     volumes:
       - ../osm/data:/osm:ro
@@ -14,7 +14,7 @@ services:
         osrm-extract -p /opt/car.lua /data/wuhan.osm.pbf
 
   osrm-contract:
-    image: osrm/osrm-backend:v5.27.1
+    image: ghcr.io/project-osrm/osrm-backend:latest
     working_dir: /data
     volumes:
       - ./data:/data
@@ -26,7 +26,7 @@ services:
         osrm-contract /data/wuhan.osrm
 
   osrm-routed:
-    image: osrm/osrm-backend:v5.27.1
+    image: ghcr.io/project-osrm/osrm-backend:latest
     working_dir: /data
     volumes:
       - ./data:/data:ro
@@ -37,4 +37,4 @@ services:
       - -lc
       - |
         test -f /data/wuhan.osrm
-        osrm-routed --host 0.0.0.0 --port 5000 /data/wuhan.osrm
+        osrm-routed -i 0.0.0.0 -p 5000 /data/wuhan.osrm

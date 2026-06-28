@@ -33,7 +33,7 @@ else
   echo "Using existing source PBF: $source_pbf"
 fi
 
-tmp_output="${wuhan_pbf}.tmp"
+tmp_output="${wuhan_pbf}.tmp.osm.pbf"
 rm -f "$tmp_output"
 
 if [ -n "$wuhan_poly_file" ]; then
