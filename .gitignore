@@ -16,8 +16,16 @@ infra/tiles/data/
 apps/mobile-flutter/build/
 apps/mobile-flutter/.dart_tool/
 apps/mobile-flutter/.flutter-plugins*
+**/.flutter-plugins-dependencies
 *.iml
 .idea/
+
+# Flutter / Android 平台层生成物（由 tool/bootstrap.sh 生成，含本机路径，不入库）
+**/android/local.properties
+**/android/.gradle/
+**/android/captures/
+**/android/**/GeneratedPluginRegistrant.*
+**/.cxx/
 
 # Node
 node_modules/

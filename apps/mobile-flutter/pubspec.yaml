@@ -1,0 +1,24 @@
+name: wuhan_nav
+description: 武汉市内导航 Demo — 仅 Android，OSM + MapLibre 开源自搭客户端。
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.7.0 <4.0.0"
+  flutter: ">=3.29.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # 地图渲染：MapLibre GL（禁止商业地图 SDK）。
+  maplibre_gl: ^0.26.2
+  # 状态管理：本项目统一使用 Riverpod（首个 Flutter 任务锁定，后续不再更换）。
+  flutter_riverpod: ^3.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
