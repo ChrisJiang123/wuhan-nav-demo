@@ -1,0 +1,22 @@
+{
+  "name": "@wuhan-nav/map-bff",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NestJS BFF for route, search, and vector tile proxy APIs.",
+  "main": "dist/src/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/src/main.js",
+    "start:dev": "npm run build && node dist/src/main.js",
+    "test": "npm run build && node --test dist/test/*.test.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.27",
+    "@nestjs/core": "^11.1.27",
+    "@nestjs/platform-fastify": "^11.1.27",
+    "@wuhan-nav/shared-types": "file:../../packages/shared-types",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  }
+}
