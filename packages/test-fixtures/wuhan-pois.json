@@ -1,0 +1,72 @@
+[
+  {
+    "id": "osm-poi-wuhan-railway-station",
+    "name": "武汉站",
+    "category": "railway_station",
+    "location": [114.4249, 30.6073],
+    "aliases": ["武汉火车站", "wuhan station", "wuhan railway station", "wuhanzhan"]
+  },
+  {
+    "id": "osm-poi-hankou-railway-station",
+    "name": "汉口站",
+    "category": "railway_station",
+    "location": [114.2546, 30.618],
+    "aliases": ["汉口火车站", "hankou station", "hankou railway station", "hankouzhan"]
+  },
+  {
+    "id": "osm-poi-wuchang-railway-station",
+    "name": "武昌站",
+    "category": "railway_station",
+    "location": [114.3162, 30.529],
+    "aliases": ["武昌火车站", "wuchang station", "wuchang railway station", "wuchangzhan"]
+  },
+  {
+    "id": "osm-poi-yellow-crane-tower",
+    "name": "黄鹤楼",
+    "category": "attraction",
+    "location": [114.3063, 30.5449],
+    "aliases": ["yellow crane tower", "huanghelou"]
+  },
+  {
+    "id": "osm-poi-optics-valley-square",
+    "name": "光谷广场",
+    "category": "commercial",
+    "location": [114.3972, 30.505],
+    "aliases": ["光谷", "guanggu", "optics valley", "optics valley square"]
+  },
+  {
+    "id": "osm-poi-hubei-provincial-museum",
+    "name": "湖北省博物馆",
+    "category": "museum",
+    "location": [114.3677, 30.5619],
+    "aliases": ["省博", "湖北博物馆", "hubei provincial museum"]
+  },
+  {
+    "id": "osm-poi-wuhan-university",
+    "name": "武汉大学",
+    "category": "university",
+    "location": [114.3651, 30.5379],
+    "aliases": ["武大", "wuhan university", "whu"]
+  },
+  {
+    "id": "osm-poi-jianghan-road",
+    "name": "江汉路",
+    "category": "commercial",
+    "location": [114.2861, 30.5841],
+    "aliases": ["江汉路步行街", "jianghan road", "jianghan road pedestrian street"]
+  },
+  {
+    "id": "osm-poi-wuhan-tianhe-airport",
+    "name": "武汉天河国际机场",
+    "category": "airport",
+    "location": [114.2081, 30.7766],
+    "aliases": ["天河机场", "wuhan airport", "wuhan tianhe airport"]
+  },
+  {
+    "id": "osm-poi-donghu-scenic-area",
+    "name": "东湖风景区",
+    "category": "park",
+    "location": [114.401, 30.556],
+    "aliases": ["东湖", "east lake", "donghu"]
+  }
+]

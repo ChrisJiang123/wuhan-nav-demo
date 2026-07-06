@@ -7,6 +7,7 @@ import type {
   SearchResponse,
   Wgs84LngLat,
 } from "@wuhan-nav/shared-types";
+import wuhanPoiFixtures from "@wuhan-nav/test-fixtures/wuhan-pois.json";
 
 import { AppConfigService } from "./config.service";
 import { apiError } from "./errors";
@@ -52,6 +53,11 @@ interface OsrmRouteResponse {
   routes?: OsrmRoute[];
 }
 
+interface RawPoiFixture extends Omit<Poi, "location"> {
+  location: readonly number[];
+  aliases?: readonly string[];
+}
+
 @Injectable()
 export class MapBffService {
   private readonly httpClient: HttpClient;
@@ -93,17 +99,20 @@ export class MapBffService {
       throw apiError("INVALID_QUERY", "q is required.", HttpStatus.BAD_REQUEST);
     }
 
+    const near = request.near ? parseLngLatQuery(request.near, "near") : undefined;
+    const fixturePois = searchFixturePois(q, near);
     const url = new URL(joinUrl(this.config.searchBaseUrl, "search"));
     url.searchParams.set("q", q);
 
-    if (request.near) {
-      url.searchParams.set("near", formatLngLat(parseLngLatQuery(request.near, "near")));
+    if (near) {
+      url.searchParams.set("near", formatLngLat(near));
     }
 
-    const payload = await this.fetchJson<SearchResponse>(url.toString(), "SEARCH_UPSTREAM_ERROR");
-    const pois = Array.isArray(payload.pois) ? payload.pois.map(toPoi) : [];
+    const upstreamPois = await this.tryFetchSearchPois(url.toString());
 
-    return { pois };
+    return {
+      pois: mergePois(upstreamPois, fixturePois),
+    };
   }
 
   async getTile(request: TileRequest): Promise<TileResponse> {
@@ -151,6 +160,15 @@ export class MapBffService {
     }
 
     return response;
+  }
+
+  private async tryFetchSearchPois(url: string): Promise<Poi[]> {
+    try {
+      const payload = await this.fetchJson<SearchResponse>(url, "SEARCH_UPSTREAM_ERROR");
+      return Array.isArray(payload.pois) ? payload.pois.map(toPoi) : [];
+    } catch {
+      return [];
+    }
   }
 }
 
@@ -208,6 +226,89 @@ function joinUrl(baseUrl: string, ...paths: string[]): string {
   const trimmedBase = baseUrl.replace(/\/+$/, "");
   const trimmedPath = paths.map((path) => path.replace(/^\/+|\/+$/g, "")).filter(Boolean).join("/");
   return trimmedPath ? `${trimmedBase}/${trimmedPath}` : trimmedBase;
+}
+
+function searchFixturePois(query: string, near: Wgs84LngLat | undefined): Poi[] {
+  const normalizedQuery = normalizeSearchText(query);
+  const scoredPois = (wuhanPoiFixtures as readonly RawPoiFixture[])
+    .map((poi) => ({ poi, score: scoreFixturePoi(poi, normalizedQuery, near) }))
+    .filter(({ score }) => score > 0)
+    .sort((left, right) => right.score - left.score);
+
+  return scoredPois.map(({ poi }) => ({
+    id: poi.id,
+    name: poi.name,
+    category: poi.category,
+    location: toWgs84Coordinate(poi.location, "fixture poi location", "SEARCH_UPSTREAM_ERROR"),
+  }));
+}
+
+function scoreFixturePoi(poi: RawPoiFixture, normalizedQuery: string, near: Wgs84LngLat | undefined): number {
+  const name = normalizeSearchText(poi.name);
+  const category = normalizeSearchText(poi.category);
+  const aliases = (poi.aliases ?? []).map(normalizeSearchText);
+  let score = 0;
+
+  if (name === normalizedQuery) {
+    score += 100;
+  } else if (name.includes(normalizedQuery)) {
+    score += 80;
+  }
+
+  for (const alias of aliases) {
+    if (alias === normalizedQuery) {
+      score += 70;
+      break;
+    }
+
+    if (alias.includes(normalizedQuery)) {
+      score += 50;
+      break;
+    }
+  }
+
+  if (category.includes(normalizedQuery)) {
+    score += 20;
+  }
+
+  if (score === 0) {
+    return 0;
+  }
+
+  if (near) {
+    const distanceKm = approximateDistanceKm(near, toWgs84Coordinate(poi.location, "fixture poi location", "SEARCH_UPSTREAM_ERROR"));
+    score += Math.max(0, 20 - Math.min(distanceKm, 20));
+  }
+
+  return score;
+}
+
+function normalizeSearchText(value: string): string {
+  return value.toLocaleLowerCase("zh-CN").replace(/\s+/g, "");
+}
+
+function approximateDistanceKm(from: Wgs84LngLat, to: Wgs84LngLat): number {
+  const lngDeltaKm = (from[0] - to[0]) * 111.32 * Math.cos((((from[1] + to[1]) / 2) * Math.PI) / 180);
+  const latDeltaKm = (from[1] - to[1]) * 110.57;
+  return Math.sqrt(lngDeltaKm ** 2 + latDeltaKm ** 2);
+}
+
+function mergePois(upstreamPois: readonly Poi[], fixturePois: readonly Poi[]): Poi[] {
+  const seen = new Set<string>();
+  const merged: Poi[] = [];
+
+  for (const poi of [...upstreamPois, ...fixturePois]) {
+    const key = poi.id || `${poi.name}:${poi.location[0]},${poi.location[1]}`;
+
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    merged.push(poi);
+  }
+
+  return merged.slice(0, 10);
 }
 
 function toRouteOption(route: OsrmRoute, index: number): RouteOption {

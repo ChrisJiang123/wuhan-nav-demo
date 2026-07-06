@@ -13,6 +13,7 @@
     "moduleResolution": "Node",
     "noEmitOnError": true,
     "outDir": "dist",
+    "resolveJsonModule": true,
     "rootDir": ".",
     "strict": true,
     "target": "ES2022",

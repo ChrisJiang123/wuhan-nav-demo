@@ -16,6 +16,7 @@
     "@nestjs/core": "^11.1.27",
     "@nestjs/platform-fastify": "^11.1.27",
     "@wuhan-nav/shared-types": "file:../../packages/shared-types",
+    "@wuhan-nav/test-fixtures": "file:../../packages/test-fixtures",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   }
