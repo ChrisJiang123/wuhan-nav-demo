@@ -28,7 +28,17 @@ Flutter（Android）· MapLibre GL · 自建矢量瓦片 · OSRM 路由 · NestJ
 
 ## CI 与 lint
 
-GitHub Actions 在 push 与 pull request 时触发。当前骨架阶段会检查 `services/*` 下后端包的 `npm run lint` 入口，并在 `apps/mobile-flutter/pubspec.yaml` 出现后执行 `flutter analyze`；在 T04/T06 之前对应项目尚未落地时，CI 会明确跳过未出现的目标以保证空骨架 PR 可通过。
+GitHub Actions 在 push 与 pull request 时触发。检查 `services/*` 下后端包的 `npm run lint` 入口；检测到 `apps/mobile-flutter/pubspec.yaml` 后自动装 Flutter 并执行 `flutter analyze`（T04 起已启用）。
+
+## Flutter 客户端（T04 起）
+
+`apps/mobile-flutter` 为仅 Android 的 MapLibre + Riverpod 客户端，当前完成 T04「骨架 + 空地图」。平台层（`android/`，含二进制）不入库，首次在装有 Flutter（>=3.29）的机器上执行：
+
+```bash
+cd apps/mobile-flutter && bash tool/bootstrap.sh && flutter run
+```
+
+细节见 `apps/mobile-flutter/README.md`。
 
 ## 锁定口径（勿改）
 
