@@ -14,6 +14,14 @@ dependencies:
   maplibre_gl: ^0.26.2
   # 状态管理：本项目统一使用 Riverpod（首个 Flutter 任务锁定，后续不再更换）。
   flutter_riverpod: ^3.3.2
+  # BFF HTTP 客户端（只调 map-bff，不直连底层）。
+  http: ^1.4.0
+  # DTO 与 packages/shared-types 镜像，不在前端重复定义。
+  shared_types:
+    path: ../../packages/shared-types/dart
+  # mock 数据资产包（源文件在 packages/test-fixtures/，经 symlink 引用）。
+  test_fixtures:
+    path: ../../packages/test_fixtures
 
 dev_dependencies:
   flutter_test:
