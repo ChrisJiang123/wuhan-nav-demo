@@ -49,7 +49,6 @@ class RouteLineRenderer {
           lineWidth: selected ? 6 : 3,
           lineOpacity: selected ? 0.95 : 0.45,
           lineJoin: 'round',
-          lineCap: 'round',
         ),
         <String, String>{'routeId': route.id},
       );

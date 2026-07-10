@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../application/trip_planner_notifier.dart';
 import '../../application/trip_planner_state.dart';
 import '../trip_confirmed_page.dart';
