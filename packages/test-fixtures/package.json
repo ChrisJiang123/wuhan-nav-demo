@@ -5,7 +5,8 @@
   "description": "Mock and fixture data for the Wuhan navigation demo.",
   "type": "module",
   "exports": {
-    "./wuhan-pois.json": "./wuhan-pois.json"
+    "./wuhan-pois.json": "./wuhan-pois.json",
+    "./wuhan-routes.json": "./wuhan-routes.json"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",

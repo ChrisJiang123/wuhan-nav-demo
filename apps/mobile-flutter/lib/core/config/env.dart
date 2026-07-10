@@ -25,4 +25,13 @@ class Env {
     'TILES_URL_TEMPLATE',
     defaultValue: '',
   );
+
+  /// 强制使用 mock map API（脱离真实 BFF 联调）。
+  static const bool useMockMapApi = bool.fromEnvironment(
+    'USE_MOCK_MAP_API',
+    defaultValue: false,
+  );
+
+  /// 未配置 BFF 或显式开启 mock 时，路由/搜索走 fixtures。
+  static bool get shouldUseMockMapApi => useMockMapApi || bffBaseUrl.isEmpty;
 }
