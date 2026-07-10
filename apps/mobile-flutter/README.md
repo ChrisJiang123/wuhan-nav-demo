@@ -1,7 +1,7 @@
 # mobile-flutter — 武汉导航 Demo Android 客户端
 
 仅 Android 的 Flutter 客户端。地图渲染用 **MapLibre GL**，状态管理用 **Riverpod**。
-本目录当前对应 **T04 空地图** + **T10 API client / mock**。
+本目录当前对应 **T04 空地图** + **T10 API client / mock** + **T09 搜索/路线选择**。
 
 ## 技术选型（首个 Flutter 任务锁定，后续不换）
 
@@ -29,7 +29,9 @@ lib/
 │  │  └─ map_provider.dart
 │  └─ theme/app_theme.dart       # 视觉 token（与 .cursor/rules 一致）
 └─ features/
-   └─ map/presentation/map_page.dart   # 空地图首页
+   ├─ home/presentation/home_page.dart      # 地图 + 可拖拽行程面板
+   ├─ trip/                                 # T09 搜索 → 路线选择
+   └─ map/presentation/map_page.dart       # T04 遗留（已由 HomePage 取代）
 test/
 ├─ map_style_test.dart
 ├─ mock_map_api_client_test.dart
@@ -88,6 +90,14 @@ final routes = await client.getRoute(
 );
 final pois = await client.search(query: '武汉站');
 ```
+
+## T09 演示路径（mock 默认开启）
+
+1. 启动 App → 底部面板搜 **武汉站** 设为起点、**汉口站** 设为终点
+2. 点 **查看路线** → 列表按 BFF 顺序展示（推荐 + 备选），地图灰线/蓝线高亮选中
+3. 点选备选 → 底部 **开始导航** → 进入占位确认页（T12 再接导航态）
+
+三条 mock 场景（武昌站→黄鹤楼、汉口站→光谷 2 备选）坐标见 `packages/test-fixtures/wuhan-routes.json`。
 
 ## 校验
 
