@@ -1,0 +1,18 @@
+{
+  "name": "@wuhan-nav/test-fixtures",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mock and fixture data for the Wuhan navigation demo.",
+  "type": "module",
+  "exports": {
+    "./wuhan-pois.json": "./wuhan-pois.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@wuhan-nav/shared-types": "file:../shared-types"
+  }
+}

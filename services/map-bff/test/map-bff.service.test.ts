@@ -99,29 +99,78 @@ describe("MapBffService", () => {
           pois: [
             {
               id: "p1",
-              name: "武汉站",
-              category: "railway_station",
-              location: [114.42, 30.61],
+              name: "自建POI",
+              category: "custom",
+              location: [114.32, 30.52],
             },
           ],
         });
       },
     );
 
-    const response = await service.search({ q: "武汉站", near: "114.3,30.59" });
+    const response = await service.search({ q: "自建POI", near: "114.3,30.59" });
 
     assert.equal(requestedUrls.length, 1);
-    assert.equal(requestedUrls[0], "http://search.local/api/search?q=%E6%AD%A6%E6%B1%89%E7%AB%99&near=114.3%2C30.59");
+    assert.equal(requestedUrls[0], "http://search.local/api/search?q=%E8%87%AA%E5%BB%BAPOI&near=114.3%2C30.59");
     assert.deepEqual(response, {
       pois: [
         {
           id: "p1",
-          name: "武汉站",
-          category: "railway_station",
-          location: [114.42, 30.61],
+          name: "自建POI",
+          category: "custom",
+          location: [114.32, 30.52],
         },
       ],
     });
+  });
+
+  it("returns fixture POIs for Wuhan landmarks when upstream search is unavailable", async () => {
+    const service = new MapBffService(new AppConfigService(), async () => {
+      throw new Error("search backend unavailable");
+    });
+
+    const response = await service.search({ q: "武汉站", near: undefined });
+
+    assert.deepEqual(response.pois[0], {
+      id: "osm-poi-wuhan-railway-station",
+      name: "武汉站",
+      category: "railway_station",
+      location: [114.4249, 30.6073],
+    });
+  });
+
+  it("uses near to rank matching fixture POIs", async () => {
+    const service = new MapBffService(new AppConfigService(), async () => {
+      throw new Error("search backend unavailable");
+    });
+
+    const response = await service.search({ q: "站", near: "114.2546,30.618" });
+
+    assert.equal(response.pois[0]?.name, "汉口站");
+    assert.ok(response.pois.some((poi) => poi.name === "武汉站"));
+    assert.ok(response.pois.some((poi) => poi.name === "武昌站"));
+  });
+
+  it("merges upstream search results with fixtures and deduplicates by id", async () => {
+    const service = new MapBffService(
+      new AppConfigService({ SEARCH_BASE_URL: "http://search.local/api" }),
+      async () =>
+        jsonResponse({
+          pois: [
+            {
+              id: "osm-poi-wuhan-railway-station",
+              name: "武汉站",
+              category: "railway_station",
+              location: [114.4249, 30.6073],
+            },
+          ],
+        }),
+    );
+
+    const response = await service.search({ q: "武汉站", near: undefined });
+
+    assert.equal(response.pois.filter((poi) => poi.id === "osm-poi-wuhan-railway-station").length, 1);
+    assert.equal(response.pois[0]?.name, "武汉站");
   });
 
   it("proxies vector tile requests through TILESERVER_BASE_URL", async () => {

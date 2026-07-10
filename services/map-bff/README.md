@@ -27,4 +27,6 @@ npm run start --workspace @wuhan-nav/map-bff
 
 The `/route` endpoint expects OSRM to be available. The `/search` and `/tiles`
 endpoints proxy the configured self-hosted services and do not use commercial
-map APIs.
+map APIs. `/search` also merges in Wuhan OSM POI fixtures from
+`packages/test-fixtures` so demo-critical landmarks remain searchable while the
+self-hosted POI backend is still sparse.
