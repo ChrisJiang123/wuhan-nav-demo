@@ -4,19 +4,35 @@ import '../config/env.dart';
 import 'bff_map_api_client.dart';
 import 'map_api_client.dart';
 import 'mock_map_api_client.dart';
+import 'resolving_map_api_client.dart';
+
+/// 最近一次路线请求的数据来源（mock / BFF / BFF 失败回落）。
+final mapDataSourceProvider = StateProvider<MapDataSource>(
+  (Ref ref) => MapDataSource.mock,
+);
 
 /// 当前使用的 [MapApiClient] 实现。
 ///
-/// - 未配置 `BFF_BASE_URL` 或显式 `--dart-define=USE_MOCK_MAP_API=true` 时用 mock。
-/// - 否则走 [BffMapApiClient]（只调 BFF `/route` `/search`）。
+/// - `USE_MOCK_MAP_API=true` → 纯 mock。
+/// - 有 BFF 地址（含 Debug 下 Android 模拟器自动 `10.0.2.2:3000`）→ 优先 BFF，失败回落 mock。
+/// - 否则 → mock。
 final mapApiClientProvider = Provider<MapApiClient>((Ref ref) {
-  if (Env.shouldUseMockMapApi) {
-    return MockMapApiClient();
+  final MockMapApiClient mock = MockMapApiClient();
+
+  if (Env.useMockMapApi || !Env.hasBffTarget) {
+    return mock;
   }
-  return BffMapApiClient(baseUrl: Env.bffBaseUrl);
+
+  return ResolvingMapApiClient(
+    bffBaseUrl: Env.resolvedBffBaseUrl!,
+    mockClient: mock,
+    onSourceChanged: (MapDataSource source) {
+      ref.read(mapDataSourceProvider.notifier).state = source;
+    },
+  );
 });
 
-/// 是否正在使用 mock 客户端（UI 可用来标注「演示数据」）。
+/// 是否未走 BFF（mock 或回落）。
 final useMockMapApiProvider = Provider<bool>((Ref ref) {
-  return Env.shouldUseMockMapApi;
+  return ref.watch(mapDataSourceProvider) != MapDataSource.bff;
 });

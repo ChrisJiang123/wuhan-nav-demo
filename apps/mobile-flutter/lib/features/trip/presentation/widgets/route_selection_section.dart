@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_types/shared_types.dart';
 
+import '../../../../core/config/env.dart';
 import '../../../../core/map_provider/map_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../application/trip_planner_notifier.dart';
 import '../../application/trip_planner_state.dart';
+import 'map_data_source_banner.dart';
 import 'route_option_card.dart';
 
 class RouteSelectionSection extends ConsumerWidget {
@@ -15,7 +17,7 @@ class RouteSelectionSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final TripPlannerState planner = ref.watch(tripPlannerProvider);
     final TripPlannerNotifier notifier = ref.read(tripPlannerProvider.notifier);
-    final bool useMock = ref.watch(useMockMapApiProvider);
+    final MapDataSource source = ref.watch(mapDataSourceProvider);
 
     if (planner.routes.isEmpty && !planner.isLoadingRoutes) {
       return const SizedBox.shrink();
@@ -44,19 +46,18 @@ class RouteSelectionSection extends ConsumerWidget {
                 ),
               ),
             ),
-            if (useMock)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Text(
-                  'mock 数据',
-                  style: TextStyle(fontSize: 11, color: AppColors.warning),
-                ),
-              ),
+            const MapDataSourceBanner(),
           ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            mapDataSourceHint(source),
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
         ),
         if (planner.origin != null && planner.destination != null)
           Padding(

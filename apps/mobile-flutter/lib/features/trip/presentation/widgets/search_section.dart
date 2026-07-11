@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_types/shared_types.dart';
 
-import '../../../../core/map_provider/map_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../application/trip_planner_notifier.dart';
 import '../../application/trip_planner_state.dart';
+import 'map_data_source_banner.dart';
 
 class SearchSection extends ConsumerStatefulWidget {
   const SearchSection({super.key});
@@ -33,7 +33,6 @@ class _SearchSectionState extends ConsumerState<SearchSection> {
   Widget build(BuildContext context) {
     final TripPlannerState planner = ref.watch(tripPlannerProvider);
     final TripPlannerNotifier notifier = ref.read(tripPlannerProvider.notifier);
-    final bool useMock = ref.watch(useMockMapApiProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -50,18 +49,7 @@ class _SearchSectionState extends ConsumerState<SearchSection> {
                 ),
               ),
             ),
-            if (useMock)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.warning.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Text(
-                  'mock 数据',
-                  style: TextStyle(fontSize: 11, color: AppColors.warning),
-                ),
-              ),
+            const MapDataSourceBanner(),
           ],
         ),
         const SizedBox(height: 12),
