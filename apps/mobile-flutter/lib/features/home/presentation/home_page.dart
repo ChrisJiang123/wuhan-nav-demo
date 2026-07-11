@@ -1,12 +1,10 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
-import 'package:shared_types/shared_types.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/map/map_style.dart';
+import '../../../core/map/route_camera.dart';
 import '../../../core/map/route_line_renderer.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../trip/application/trip_planner_notifier.dart';
@@ -23,8 +21,18 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   final RouteLineRenderer _routeRenderer = RouteLineRenderer();
+  final DraggableScrollableController _sheetController =
+      DraggableScrollableController();
+
   MapLibreMapController? _mapController;
   TripPlannerPhase? _lastPhase;
+
+  /// 当前底部面板占屏比（用于全览 padding 与 attribution 位置）。
+  double _sheetExtent = 0.32;
+
+  static const double _sheetMin = 0.22;
+  static const double _sheetSearchDefault = 0.32;
+  static const double _sheetRoutesDefault = 0.28;
 
   String get _styleJson => buildRasterStyleJson(
         tileUrlTemplate: AppConfig.tileUrlTemplate,
@@ -33,6 +41,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   void dispose() {
+    _sheetController.dispose();
     _routeRenderer.dispose();
     super.dispose();
   }
@@ -44,71 +53,54 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Future<void> _onStyleLoaded() async {
     _routeRenderer.markStyleLoaded();
-    await _syncRoutesFromState();
+    await _syncRoutesFromState(animateSheet: false);
   }
 
-  Future<void> _syncRoutesFromState() async {
+  double _sheetBottomPadding(BuildContext context) {
+    final double screenHeight = MediaQuery.sizeOf(context).height;
+    return screenHeight * _sheetExtent + 24;
+  }
+
+  Future<void> _fitRouteOverview() async {
+    if (_mapController == null) {
+      return;
+    }
+    final TripPlannerState planner = ref.read(tripPlannerProvider);
+    if (planner.routes.isEmpty) {
+      return;
+    }
+
+    await animateCameraToRouteOverview(
+      controller: _mapController!,
+      routes: planner.routes,
+      top: MediaQuery.paddingOf(context).top + 48,
+      bottom: _sheetBottomPadding(context),
+    );
+  }
+
+  Future<void> _syncRoutesFromState({required bool animateSheet}) async {
     final TripPlannerState planner = ref.read(tripPlannerProvider);
     if (planner.phase != TripPlannerPhase.routes || planner.routes.isEmpty) {
       await _routeRenderer.clear();
       return;
     }
+
+    if (animateSheet && _sheetController.isAttached) {
+      await _sheetController.animateTo(
+        _sheetRoutesDefault,
+        duration: AppMotion.medium,
+        curve: Curves.easeOut,
+      );
+      if (mounted) {
+        setState(() => _sheetExtent = _sheetRoutesDefault);
+      }
+    }
+
     await _routeRenderer.updateRoutes(
       planner.routes,
       selectedRouteId: planner.selectedRouteId,
     );
-    await _fitCameraToRoutes(planner.routes, planner.selectedRouteId);
-  }
-
-  Future<void> _fitCameraToRoutes(
-    List<RouteOption> routes,
-    String? selectedRouteId,
-  ) async {
-    if (_mapController == null || routes.isEmpty) {
-      return;
-    }
-
-    RouteOption? target;
-    for (final RouteOption route in routes) {
-      if (route.id == selectedRouteId) {
-        target = route;
-        break;
-      }
-    }
-    target ??= routes.first;
-    if (target.geometry.isEmpty) {
-      return;
-    }
-
-    double minLat = target.geometry.first.lat;
-    double maxLat = minLat;
-    double minLng = target.geometry.first.lng;
-    double maxLng = minLng;
-
-    for (final Wgs84LngLat point in target.geometry) {
-      minLat = math.min(minLat, point.lat);
-      maxLat = math.max(maxLat, point.lat);
-      minLng = math.min(minLng, point.lng);
-      maxLng = math.max(maxLng, point.lng);
-    }
-
-    final double centerLat = (minLat + maxLat) / 2;
-    final double centerLng = (minLng + maxLng) / 2;
-    final double span = math.max(maxLat - minLat, maxLng - minLng);
-    final double zoom = span > 0.25
-        ? 10.5
-        : span > 0.12
-            ? 11.5
-            : 12.5;
-
-    await _mapController!.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(centerLat, centerLng),
-          zoom: zoom,
-        ),
-      ),
-    );
+    await _fitRouteOverview();
   }
 
   @override
@@ -117,57 +109,108 @@ class _HomePageState extends ConsumerState<HomePage> {
       TripPlannerState? previous,
       TripPlannerState next,
     ) {
-      final bool routesChanged = previous?.routes != next.routes ||
-          previous?.selectedRouteId != next.selectedRouteId ||
-          previous?.phase != next.phase;
-      if (routesChanged) {
+      final bool enteredRoutes =
+          previous?.phase != TripPlannerPhase.routes &&
+              next.phase == TripPlannerPhase.routes &&
+              next.routes.isNotEmpty;
+
+      final bool selectionChanged =
+          next.phase == TripPlannerPhase.routes &&
+              previous?.selectedRouteId != next.selectedRouteId &&
+              previous?.routes.isNotEmpty == true;
+
+      if (enteredRoutes) {
         // ignore: discarded_futures
-        _syncRoutesFromState();
+        _syncRoutesFromState(animateSheet: true);
+      } else if (selectionChanged) {
+        // 切换选中路线只更新高亮，不抢用户缩放。
+        // ignore: discarded_futures
+        _routeRenderer.updateRoutes(
+          next.routes,
+          selectedRouteId: next.selectedRouteId,
+        );
+      } else if (previous?.routes != next.routes ||
+          previous?.phase != next.phase) {
+        // ignore: discarded_futures
+        _syncRoutesFromState(animateSheet: false);
       }
 
-      if (_lastPhase != next.phase && next.phase == TripPlannerPhase.routes) {
-        // 进入路线态时略微抬高面板（由 DraggableScrollableSheet 默认 snap 处理）。
+      if (next.phase == TripPlannerPhase.search &&
+          _lastPhase == TripPlannerPhase.routes &&
+          _sheetController.isAttached) {
+        // ignore: discarded_futures
+        _sheetController.animateTo(
+          _sheetSearchDefault,
+          duration: AppMotion.short,
+          curve: Curves.easeOut,
+        );
       }
       _lastPhase = next.phase;
     });
 
     const LngLat center = AppConfig.wuhanCenter;
     final TripPlannerState planner = ref.watch(tripPlannerProvider);
-    final double initialSheetSize =
-        planner.phase == TripPlannerPhase.routes ? 0.52 : 0.38;
+    final bool showRoutesUi = planner.phase == TripPlannerPhase.routes;
+    final double initialSheetSize = showRoutesUi
+        ? _sheetRoutesDefault
+        : _sheetSearchDefault;
 
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          MapLibreMap(
-            styleString: _styleJson,
-            initialCameraPosition: CameraPosition(
-              target: LatLng(center.lat, center.lng),
-              zoom: AppConfig.initialZoom,
+          // 地图全屏，手势不受底部面板阻挡（面板只覆盖底部区域）。
+          Positioned.fill(
+            child: MapLibreMap(
+              styleString: _styleJson,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(center.lat, center.lng),
+                zoom: AppConfig.initialZoom,
+              ),
+              minMaxZoomPreference: const MinMaxZoomPreference(
+                AppConfig.minZoom,
+                AppConfig.maxZoom,
+              ),
+              scrollGesturesEnabled: true,
+              zoomGesturesEnabled: true,
+              rotateGesturesEnabled: true,
+              tiltGesturesEnabled: true,
+              myLocationEnabled: false,
+              compassEnabled: true,
+              onMapCreated: _onMapCreated,
+              onStyleLoadedCallback: _onStyleLoaded,
             ),
-            minMaxZoomPreference: const MinMaxZoomPreference(
-              AppConfig.minZoom,
-              AppConfig.maxZoom,
-            ),
-            myLocationEnabled: false,
-            compassEnabled: true,
-            onMapCreated: _onMapCreated,
-            onStyleLoadedCallback: _onStyleLoaded,
           ),
-          const _AttributionBadge(),
+          _AttributionBadge(bottomInset: _sheetBottomPadding(context)),
           if (AppConfig.usingPlaceholderTiles) const _PlaceholderTilesBadge(),
-          DraggableScrollableSheet(
-            key: ValueKey<TripPlannerPhase>(planner.phase),
-            initialChildSize: initialSheetSize,
-            minChildSize: 0.22,
-            maxChildSize: 0.86,
-            snap: true,
-            snapSizes: planner.phase == TripPlannerPhase.routes
-                ? const <double>[0.38, 0.52, 0.86]
-                : const <double>[0.28, 0.38, 0.62],
-            builder: (BuildContext context, ScrollController scrollController) {
-              return TripPlannerSheet(scrollController: scrollController);
+          if (showRoutesUi && planner.routes.isNotEmpty)
+            Positioned(
+              right: 12,
+              bottom: _sheetBottomPadding(context) + 8,
+              child: SafeArea(
+                top: false,
+                child: _OverviewButton(onPressed: _fitRouteOverview),
+              ),
+            ),
+          NotificationListener<DraggableScrollableNotification>(
+            onNotification: (DraggableScrollableNotification notification) {
+              if ((_sheetExtent - notification.extent).abs() > 0.01) {
+                setState(() => _sheetExtent = notification.extent);
+              }
+              return false;
             },
+            child: DraggableScrollableSheet(
+              controller: _sheetController,
+              initialChildSize: initialSheetSize,
+              minChildSize: _sheetMin,
+              maxChildSize: 0.86,
+              snap: true,
+              snapSizes: showRoutesUi
+                  ? const <double>[0.22, 0.28, 0.45, 0.86]
+                  : const <double>[0.22, 0.32, 0.55, 0.86],
+              builder: (BuildContext context, ScrollController scrollController) {
+                return TripPlannerSheet(scrollController: scrollController);
+              },
+            ),
           ),
         ],
       ),
@@ -175,15 +218,55 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 }
 
+class _OverviewButton extends StatelessWidget {
+  const _OverviewButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 2,
+      borderRadius: BorderRadius.circular(20),
+      color: Colors.white,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(20),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(Icons.fit_screen, size: 18, color: AppColors.brand),
+              SizedBox(width: 4),
+              Text(
+                '全览',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.brand,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _AttributionBadge extends StatelessWidget {
-  const _AttributionBadge();
+  const _AttributionBadge({required this.bottomInset});
+
+  final double bottomInset;
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
       right: 8,
-      bottom: 8,
+      bottom: bottomInset,
       child: SafeArea(
+        top: false,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.75),
