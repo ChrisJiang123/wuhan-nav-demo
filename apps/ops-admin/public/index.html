@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>武汉导航运营后台</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Report Review</p>
+        <h1>上报审核</h1>
+      </div>
+      <button class="primary-action" id="refresh-button" type="button">刷新</button>
+    </header>
+
+    <main class="shell">
+      <section class="toolbar" aria-label="筛选与服务地址">
+        <label class="service-field">
+          <span>Report service</span>
+          <input id="base-url-input" type="url" autocomplete="off" />
+        </label>
+        <div class="status-tabs" role="tablist" aria-label="审核状态">
+          <button class="status-tab is-active" type="button" data-status="">全部</button>
+          <button class="status-tab" type="button" data-status="pending">待审</button>
+          <button class="status-tab" type="button" data-status="approved">通过</button>
+          <button class="status-tab" type="button" data-status="rejected">驳回</button>
+        </div>
+      </section>
+
+      <section class="summary-grid" aria-label="状态统计">
+        <div class="metric">
+          <span>待审</span>
+          <strong id="pending-count">0</strong>
+        </div>
+        <div class="metric">
+          <span>通过</span>
+          <strong id="approved-count">0</strong>
+        </div>
+        <div class="metric">
+          <span>驳回</span>
+          <strong id="rejected-count">0</strong>
+        </div>
+      </section>
+
+      <section class="table-section" aria-live="polite">
+        <div class="table-header">
+          <h2>上报记录</h2>
+          <span id="status-message">未加载</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>类型</th>
+                <th>位置</th>
+                <th>描述</th>
+                <th>匿名</th>
+                <th>状态</th>
+                <th>时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="reports-body"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="empty-state" hidden>暂无上报记录</div>
+      </section>
+    </main>
+
+    <!-- OPS_ADMIN_CONFIG -->
+    <script src="/app.js"></script>
+  </body>
+</html>
