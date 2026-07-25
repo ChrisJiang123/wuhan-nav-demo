@@ -1,0 +1,12 @@
+{
+  "name": "@wuhan-nav/ops-admin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Demo operations admin for reviewing reported road events.",
+  "type": "module",
+  "scripts": {
+    "lint": "node --check server.mjs && node --check public/app.js",
+    "start": "node server.mjs",
+    "test": "npm run lint"
+  }
+}
