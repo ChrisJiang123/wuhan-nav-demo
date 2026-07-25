@@ -1,15 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config/env.dart';
-import 'bff_map_api_client.dart';
 import 'map_api_client.dart';
 import 'mock_map_api_client.dart';
 import 'resolving_map_api_client.dart';
 
 /// 最近一次路线请求的数据来源（mock / BFF / BFF 失败回落）。
-final mapDataSourceProvider = StateProvider<MapDataSource>(
-  (Ref ref) => MapDataSource.mock,
-);
+final mapDataSourceProvider =
+    NotifierProvider<MapDataSourceNotifier, MapDataSource>(
+      MapDataSourceNotifier.new,
+    );
+
+class MapDataSourceNotifier extends Notifier<MapDataSource> {
+  @override
+  MapDataSource build() => MapDataSource.mock;
+
+  void setSource(MapDataSource source) {
+    state = source;
+  }
+}
 
 /// 当前使用的 [MapApiClient] 实现。
 ///
@@ -27,7 +36,7 @@ final mapApiClientProvider = Provider<MapApiClient>((Ref ref) {
     bffBaseUrl: Env.resolvedBffBaseUrl!,
     mockClient: mock,
     onSourceChanged: (MapDataSource source) {
-      ref.read(mapDataSourceProvider.notifier).state = source;
+      ref.read(mapDataSourceProvider.notifier).setSource(source);
     },
   );
 });

@@ -37,9 +37,9 @@ class _SearchSectionState extends ConsumerState<SearchSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Row(
+        const Row(
           children: <Widget>[
-            const Expanded(
+            Expanded(
               child: Text(
                 '去哪？',
                 style: TextStyle(
@@ -49,7 +49,7 @@ class _SearchSectionState extends ConsumerState<SearchSection> {
                 ),
               ),
             ),
-            const MapDataSourceBanner(),
+            MapDataSourceBanner(),
           ],
         ),
         const SizedBox(height: 12),
@@ -89,9 +89,10 @@ class _SearchSectionState extends ConsumerState<SearchSection> {
         TextField(
           controller: _queryController,
           decoration: InputDecoration(
-            hintText: planner.activeField == ActiveEndpointField.origin
-                ? '搜索起点，如：武汉站'
-                : '搜索终点，如：汉口站',
+            hintText:
+                planner.activeField == ActiveEndpointField.origin
+                    ? '搜索起点，如：武汉站'
+                    : '搜索终点，如：汉口站',
             prefixIcon: const Icon(Icons.search),
             filled: true,
             fillColor: Colors.white,
@@ -150,9 +151,10 @@ class _SearchSectionState extends ConsumerState<SearchSection> {
         const SizedBox(height: 12),
         if (planner.phase == TripPlannerPhase.search)
           FilledButton(
-            onPressed: planner.canPlanRoute && !planner.isLoadingRoutes
-                ? () => notifier.fetchRoutes()
-                : null,
+            onPressed:
+                planner.canPlanRoute && !planner.isLoadingRoutes
+                    ? () => notifier.fetchRoutes()
+                    : null,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.brand,
               minimumSize: const Size.fromHeight(48),
@@ -160,16 +162,17 @@ class _SearchSectionState extends ConsumerState<SearchSection> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: planner.isLoadingRoutes
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text('查看路线'),
+            child:
+                planner.isLoadingRoutes
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                    : const Text('查看路线'),
           ),
       ],
     );
@@ -194,9 +197,7 @@ class _EndpointField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active
-          ? AppColors.brand.withValues(alpha: 0.06)
-          : Colors.white,
+      color: active ? AppColors.brand.withValues(alpha: 0.06) : Colors.white,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -237,9 +238,10 @@ class _EndpointField extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: value == null
-                            ? AppColors.textTertiary
-                            : AppColors.nightBackground,
+                        color:
+                            value == null
+                                ? AppColors.textTertiary
+                                : AppColors.nightBackground,
                       ),
                     ),
                   ],

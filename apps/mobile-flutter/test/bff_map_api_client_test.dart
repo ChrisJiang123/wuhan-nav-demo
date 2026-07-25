@@ -67,6 +67,9 @@ void main() {
             ],
           }),
           200,
+          headers: <String, String>{
+            'content-type': 'application/json; charset=utf-8',
+          },
         );
       });
 
@@ -90,6 +93,9 @@ void main() {
             },
           }),
           404,
+          headers: <String, String>{
+            'content-type': 'application/json; charset=utf-8',
+          },
         );
       });
 

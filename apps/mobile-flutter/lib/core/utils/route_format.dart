@@ -17,7 +17,7 @@ String formatDurationSec(int seconds) {
 
 String formatDistanceM(int meters) {
   if (meters < 1000) {
-    return '${meters}米';
+    return '$meters米';
   }
   return '${(meters / 1000).toStringAsFixed(1)}公里';
 }
@@ -41,14 +41,16 @@ String formatRouteDelta({
 
   final List<String> parts = <String>[];
   if (durationDeltaMin != 0) {
-    parts.add(durationDeltaMin > 0 ? '+$durationDeltaMin分钟' : '$durationDeltaMin分钟');
+    parts.add(
+      durationDeltaMin > 0 ? '+$durationDeltaMin分钟' : '$durationDeltaMin分钟',
+    );
   }
   if (distanceDeltaM.abs() >= 100) {
     if (distanceDeltaM.abs() < 1000) {
-      parts.add(distanceDeltaM > 0 ? '+${distanceDeltaM}米' : '${distanceDeltaM}米');
+      parts.add(distanceDeltaM > 0 ? '+$distanceDeltaM米' : '$distanceDeltaM米');
     } else {
       final String km = (distanceDeltaM / 1000).toStringAsFixed(1);
-      parts.add(distanceDeltaM > 0 ? '+${km}公里' : '$km公里');
+      parts.add(distanceDeltaM > 0 ? '+$km公里' : '$km公里');
     }
   }
   return parts.isEmpty ? '与推荐相近' : parts.join(' · ');
