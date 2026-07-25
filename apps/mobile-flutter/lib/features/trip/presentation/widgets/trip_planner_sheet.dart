@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../navigation/application/navigation_state.dart';
+import '../../../navigation/presentation/navigation_page.dart';
 import '../../application/trip_planner_notifier.dart';
 import '../../application/trip_planner_state.dart';
-import '../trip_confirmed_page.dart';
 import 'route_selection_section.dart';
 import 'search_section.dart';
 
@@ -61,10 +62,12 @@ class TripPlannerSheet extends ConsumerWidget {
                     }
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                        builder: (_) => TripConfirmedPage(
-                          originName: current.origin!.name,
-                          destinationName: current.destination!.name,
-                          route: selected,
+                        builder: (_) => NavigationPage(
+                          session: NavigationSession(
+                            originName: current.origin!.name,
+                            destinationName: current.destination!.name,
+                            route: selected,
+                          ),
                         ),
                       ),
                     );

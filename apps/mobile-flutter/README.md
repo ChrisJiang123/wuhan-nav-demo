@@ -1,7 +1,7 @@
 # mobile-flutter — 武汉导航 Demo Android 客户端
 
 仅 Android 的 Flutter 客户端。地图渲染用 **MapLibre GL**，状态管理用 **Riverpod**。
-本目录当前对应 **T04 空地图** + **T10 API client / mock** + **T09 搜索/路线选择**。
+本目录当前对应 **T04 空地图** + **T10 API client / mock** + **T09 搜索/路线选择** + **T12 导航态核心**。
 
 ## 技术选型（首个 Flutter 任务锁定，后续不换）
 
@@ -31,10 +31,12 @@ lib/
 └─ features/
    ├─ home/presentation/home_page.dart      # 地图 + 可拖拽行程面板
    ├─ trip/                                 # T09 搜索 → 路线选择
+   ├─ navigation/                           # T12 导航态（跟随/回中/前台服务）
    └─ map/presentation/map_page.dart       # T04 遗留（已由 HomePage 取代）
 test/
 ├─ map_style_test.dart
 ├─ mock_map_api_client_test.dart
+├─ route_progress_test.dart
 └─ bff_map_api_client_test.dart
 tool/
 └─ bootstrap.sh                  # 生成 Android 平台层
@@ -91,13 +93,19 @@ final routes = await client.getRoute(
 final pois = await client.search(query: '武汉站');
 ```
 
-## T09 演示路径（mock 默认开启）
+## T09 → T12 演示路径
 
-1. 启动 App → 底部面板搜 **武汉站** 设为起点、**汉口站** 设为终点
-2. 点 **查看路线** → 列表按 BFF 顺序展示（推荐 + 备选），地图灰线/蓝线高亮选中
-3. 点选备选 → 底部 **开始导航** → 进入占位确认页（T12 再接导航态）
+1. 启动 App → 底部面板搜 **武汉站** / **汉口站** → **查看路线** → **开始导航**
+2. 进入导航态：顶部下一动作 + 剩余里程/时间；底部 5 控件（上报占位 / 总览 / 结束 / 回中 / 静音）
+3. Debug 默认 **模拟沿路线** 移动（验收跟随）；真机请切到 **真实 GPS**
+4. 通知栏应出现「武汉导航进行中」（前台服务）；息屏/后台保活需真机验证
 
-三条 mock 场景（武昌站→黄鹤楼、汉口站→光谷 2 备选）坐标见 `packages/test-fixtures/wuhan-routes.json`。
+### 真机验收注意（不确定项）
+
+- 首次进入导航会请求定位与通知权限；后台定位需在系统设置里额外授权。
+- Android 14+ 前台服务类型为 `location`；若启动失败，导航仍可前台运行，但保活不保证。
+- 部分 OEM 省电策略会杀后台；可能需关闭电池优化（未强制弹系统页，避免过度打扰）。
+- TTS 播报在 T13；本任务静音只切换状态。
 
 ## 校验
 
@@ -106,7 +114,7 @@ flutter analyze
 flutter test
 ```
 
-## 边界（T04/T10 不做）
+## 边界（T12 不做）
 
-定位跟随/回中（T12）、路线渲染与路况着色（T11）、搜索与路线**页面 UI**（T09）均不在本任务内。
+TTS 播报（T13）、弱网缓存（T14）、完整上报（T15）、路况静态着色增强（T11）均不扩大范围。
 数据署名：© OpenStreetMap contributors（ODbL）。

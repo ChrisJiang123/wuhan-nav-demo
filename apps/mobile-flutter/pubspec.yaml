@@ -22,6 +22,12 @@ dependencies:
   # mock 数据资产包（源文件在 packages/test-fixtures/，经 symlink 引用）。
   test_fixtures:
     path: ../../packages/test_fixtures
+  # 定位（导航跟随）。
+  geolocator: ^14.0.0
+  # 运行时权限（通知等；定位也可由 geolocator 请求）。
+  permission_handler: ^12.0.0
+  # 导航态前台服务保活（Android）。
+  flutter_foreground_task: ^9.1.0
 
 dev_dependencies:
   flutter_test:
