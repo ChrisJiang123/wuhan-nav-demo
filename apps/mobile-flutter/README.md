@@ -1,7 +1,7 @@
 # mobile-flutter — 武汉导航 Demo Android 客户端
 
 仅 Android 的 Flutter 客户端。地图渲染用 **MapLibre GL**，状态管理用 **Riverpod**。
-本目录当前对应 **T04：Flutter 骨架 + 空地图**——启动即显示可缩放的武汉城区地图。
+本目录当前对应 **T04 空地图** + **T10 API client / mock** + **T09 搜索/路线选择**。
 
 ## 技术选型（首个 Flutter 任务锁定，后续不换）
 
@@ -22,11 +22,20 @@ lib/
 │  ├─ config/env.dart            # --dart-define 注入的运行期地址
 │  ├─ config/app_config.dart     # 武汉中心、缩放、瓦片源、署名
 │  ├─ map/map_style.dart         # 纯函数：构建 MapLibre style JSON（有单测）
+│  ├─ map_provider/              # T10：BFF client + mock client + Riverpod
+│  │  ├─ map_api_client.dart     # 接口（只调 BFF /route /search）
+│  │  ├─ bff_map_api_client.dart
+│  │  ├─ mock_map_api_client.dart
+│  │  └─ map_provider.dart
 │  └─ theme/app_theme.dart       # 视觉 token（与 .cursor/rules 一致）
 └─ features/
-   └─ map/presentation/map_page.dart   # 空地图首页
+   ├─ home/presentation/home_page.dart      # 地图 + 可拖拽行程面板
+   ├─ trip/                                 # T09 搜索 → 路线选择
+   └─ map/presentation/map_page.dart       # T04 遗留（已由 HomePage 取代）
 test/
-└─ map_style_test.dart           # style 构建纯函数单测
+├─ map_style_test.dart
+├─ mock_map_api_client_test.dart
+└─ bff_map_api_client_test.dart
 tool/
 └─ bootstrap.sh                  # 生成 Android 平台层
 ```
@@ -60,6 +69,36 @@ flutter run \
 
 Android 模拟器用 `10.0.2.2` 访问宿主机 localhost。前端一切外部数据经 BFF，不直连 tileserver/路由引擎。
 
+## 路由 / 搜索 API（T10）
+
+DTO 来自 `packages/shared-types/dart`（镜像 TS shared-types），不在本目录重复定义。
+
+| 模式 | 条件 | 说明 |
+|---|---|---|
+| **mock（默认）** | 未设置 `BFF_BASE_URL` | 读 `packages/test-fixtures` 的 POI/路线 fixtures；`id`/`summary` 带 `mock` 前缀 |
+| **真实 BFF** | `--dart-define=BFF_BASE_URL=http://10.0.2.2:3000` | 只调 `/route` `/search` |
+| **强制 mock** | `--dart-define=USE_MOCK_MAP_API=true` | 即使有 BFF 也用 mock |
+
+mock 路线量级贴近 T03 实测：武汉站→汉口站 19884m/1043s、武昌站→黄鹤楼 3001m、汉口站→光谷 24438m（2 条备选）。
+
+```dart
+// Riverpod 注入
+final client = ref.read(mapApiClientProvider);
+final routes = await client.getRoute(
+  origin: Wgs84LngLat(lng: 114.4249, lat: 30.6073),
+  destination: Wgs84LngLat(lng: 114.2546, lat: 30.618),
+);
+final pois = await client.search(query: '武汉站');
+```
+
+## T09 演示路径（mock 默认开启）
+
+1. 启动 App → 底部面板搜 **武汉站** 设为起点、**汉口站** 设为终点
+2. 点 **查看路线** → 列表按 BFF 顺序展示（推荐 + 备选），地图灰线/蓝线高亮选中
+3. 点选备选 → 底部 **开始导航** → 进入占位确认页（T12 再接导航态）
+
+三条 mock 场景（武昌站→黄鹤楼、汉口站→光谷 2 备选）坐标见 `packages/test-fixtures/wuhan-routes.json`。
+
 ## 校验
 
 ```bash
@@ -67,7 +106,7 @@ flutter analyze
 flutter test
 ```
 
-## 边界（本任务不做）
+## 边界（T04/T10 不做）
 
-定位跟随/回中（T12）、路线渲染与路况着色（T11）、搜索与路线页（T09）均不在 T04 内，
-本页不提前实现。数据署名：© OpenStreetMap contributors（ODbL）。
+定位跟随/回中（T12）、路线渲染与路况着色（T11）、搜索与路线**页面 UI**（T09）均不在本任务内。
+数据署名：© OpenStreetMap contributors（ODbL）。

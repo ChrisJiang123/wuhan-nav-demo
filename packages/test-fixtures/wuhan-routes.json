@@ -1,0 +1,94 @@
+[
+  {
+    "id": "mock-wuhan-station-to-hankou-station",
+    "description": "武汉站→汉口站（mock，量级贴近 OSRM 实测 19884m / 1043s）",
+    "origin": [114.4249, 30.6073],
+    "destination": [114.2546, 30.618],
+    "alternatives": false,
+    "response": {
+      "routes": [
+        {
+          "id": "mock-r1",
+          "durationSec": 1043,
+          "distanceM": 19884,
+          "tollEstimateYuan": 0,
+          "tag": "推荐",
+          "summary": "mock·经二环过长江（武汉站→汉口站）",
+          "geometry": [
+            [114.4249, 30.6073],
+            [114.392, 30.6095],
+            [114.338, 30.6128],
+            [114.292, 30.6162],
+            [114.2546, 30.618]
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "mock-wuchang-station-to-yellow-crane-tower",
+    "description": "武昌站→黄鹤楼（mock，量级贴近 OSRM 实测 3001m）",
+    "origin": [114.3162, 30.529],
+    "destination": [114.3063, 30.5449],
+    "alternatives": false,
+    "response": {
+      "routes": [
+        {
+          "id": "mock-r1",
+          "durationSec": 482,
+          "distanceM": 3001,
+          "tollEstimateYuan": 0,
+          "tag": "推荐",
+          "summary": "mock·沿中山路北上（武昌站→黄鹤楼）",
+          "geometry": [
+            [114.3162, 30.529],
+            [114.3125, 30.535],
+            [114.3088, 30.5405],
+            [114.3063, 30.5449]
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "mock-hankou-station-to-optics-valley",
+    "description": "汉口站→光谷（mock，量级贴近 OSRM 实测 24438m，含 2 条备选）",
+    "origin": [114.2546, 30.618],
+    "destination": [114.3972, 30.505],
+    "alternatives": true,
+    "response": {
+      "routes": [
+        {
+          "id": "mock-r1",
+          "durationSec": 2185,
+          "distanceM": 24438,
+          "tollEstimateYuan": 0,
+          "tag": "推荐",
+          "summary": "mock·经三环过东湖（汉口站→光谷）",
+          "geometry": [
+            [114.2546, 30.618],
+            [114.288, 30.592],
+            [114.332, 30.558],
+            [114.368, 30.528],
+            [114.3972, 30.505]
+          ]
+        },
+        {
+          "id": "mock-r2",
+          "durationSec": 2310,
+          "distanceM": 25120,
+          "tollEstimateYuan": 0,
+          "tag": "备选2",
+          "summary": "mock·经东湖大道绕行（汉口站→光谷）",
+          "geometry": [
+            [114.2546, 30.618],
+            [114.302, 30.585],
+            [114.348, 30.552],
+            [114.382, 30.522],
+            [114.3972, 30.505]
+          ]
+        }
+      ]
+    }
+  }
+]

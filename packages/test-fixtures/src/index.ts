@@ -2,6 +2,8 @@ import type { Poi, Wgs84LngLat } from "@wuhan-nav/shared-types";
 
 import wuhanPois from "../wuhan-pois.json";
 
+export { wuhanRouteFixtures, type RouteFixture } from "./wuhan-routes.js";
+
 export interface PoiFixture extends Poi {
   aliases: readonly string[];
 }
